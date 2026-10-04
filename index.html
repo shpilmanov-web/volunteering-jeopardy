@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ג'פרדי ניהול התנדבות</title>
+  <style>
+    :root {
+      --bg-primary: #060b26;
+      --bg-card: #0c1847;
+      --accent-gold: #ffcc00;
+      --accent-blue: #1e3a8a;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      width: 100%;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      color: var(--accent-gold);
+      text-shadow: 0 4px 12px rgba(255, 204, 0, 0.4);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-main);
+      text-align: center;
+    }
+
+    p.subtitle {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+      color: #fff;
+      border: 2px solid var(--accent-gold);
+      padding: 0.8rem 2rem;
+      font-size: 1.25rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 204, 0, 0.3);
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    /* Screen 1: Splash */
+    #screen-splash {
+      cursor: pointer;
+    }
+    .pulse-text {
+      animation: pulse 1.8s infinite;
+      font-size: 1.3rem;
+      color: var(--accent-gold);
+      margin-top: 2rem;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* Screen 2: Rules */
+    .rules-card {
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2.5rem;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .rules-list {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+    .rules-list li {
+      font-size: 1.25rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-right: 2rem;
+    }
+    .rules-list li::before {
+      content: "◆";
+      position: absolute;
+      right: 0;
+      color: var(--accent-gold);
+      font-size: 1.1rem;
+    }
+    .example-box {
+      background: rgba(30, 58, 138, 0.5);
+      border-right: 4px solid var(--accent-gold);
+      padding: 0.8rem 1rem;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+      font-size: 1.05rem;
+      color: #e2e8f0;
+    }
+
+    /* Screen 3: Lobby */
+    .lobby-container {
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 750px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    label {
+      font-weight: bold;
+      color: var(--accent-gold);
+      font-size: 1.1rem;
+    }
+    select, input[type="text"] {
+      padding: 0.7rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #081033;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+    }
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent-gold);
+    }
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Screen 4: Game */
+    #screen-game {
+      justify-content: flex-start;
+      padding: 1rem;
+      position: relative;
+    }
+    .game-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0 1rem;
+    }
+    .board-container {
+      width: 100%;
+      max-width: 1400px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .board-row {
+      display: grid;
+      gap: 8px;
+      width: 100%;
+    }
+    .board-header-cell {
+      background: linear-gradient(180deg, #1e3a8a, #0f172a);
+      border: 2px solid var(--border-color);
+      color: var(--accent-gold);
+      padding: 0.8rem 0.5rem;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.05rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px;
+      word-break: break-word;
+    }
+    .card-cell {
+      background-color: var(--bg-card);
+      border: 2px solid #1e40af;
+      color: var(--accent-gold);
+      font-size: 2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 90px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.15s, background-color 0.15s;
+    }
+    .card-cell:hover:not(.disabled) {
+      transform: scale(1.02);
+      background-color: #1e3a8a;
+      border-color: var(--accent-gold);
+    }
+    .card-cell.disabled {
+      background-color: #0b0f19;
+      color: #334155;
+      border-color: #1e293b;
+      cursor: not-allowed;
+    }
+
+    /* Scoreboard */
+    .scoreboard {
+      width: 100%;
+      max-width: 1400px;
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .team-card {
+      flex: 1;
+      min-width: 160px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .team-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #fff;
+      outline: none;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-align: center;
+      cursor: text;
+    }
+    .team-name:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-bottom: 2px solid var(--accent-gold);
+    }
+    .team-score {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+    .score-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .score-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      font-weight: bold;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .score-btn.plus { background: #16a34a; color: white; }
+    .score-btn.minus { background: #dc2626; color: white; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      z-index: 100;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-card);
+      border: 3px solid var(--accent-gold);
+      border-radius: 12px;
+      max-width: 900px;
+      width: 100%;
+      padding: 2.5rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+    .daily-double-banner {
+      background: linear-gradient(90deg, #ea580c, #f59e0b);
+      color: white;
+      font-weight: 900;
+      font-size: 2rem;
+      padding: 0.5rem 2rem;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: none;
+    }
+    .timer-display {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #38bdf8;
+      border: 3px solid #38bdf8;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .timer-display.danger {
+      color: var(--accent-red);
+      border-color: var(--accent-red);
+      animation: shake 0.3s infinite;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+    .clue-text {
+      font-size: 1.8rem;
+      line-height: 1.5;
+      text-align: center;
+      color: #fff;
+    }
+    .answer-box {
+      display: none;
+      background: rgba(30, 58, 138, 0.6);
+      border: 2px dashed var(--accent-gold);
+      padding: 1.5rem;
+      border-radius: 8px;
+      font-size: 1.6rem;
+      color: var(--accent-gold);
+      text-align: center;
+      width: 100%;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    #modal-rules-floating .modal-content {
+      max-width: 700px;
+      align-items: flex-start;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen 1: Splash -->
+  <div id="screen-splash" class="screen active" onclick="showScreen('screen-rules')">
+    <h1>ג'פרדי ניהול התנדבות</h1>
+    <p class="subtitle">זירת המקצוענות והטריוויה של רכזי ומנהלי ההתנדבות</p>
+    <div class="pulse-text">לחצו בכל מקום להתחלת המשחק</div>
+  </div>
+
+  <!-- Screen 2: Rules -->
+  <div id="screen-rules" class="screen">
+    <div class="rules-card">
+      <h2>כללי המשחק המחייבים</h2>
+      <ul class="rules-list">
+        <li>
+          <strong>זכות דיבור בלעדית:</strong>
+          הקבוצה שבחרה את השאלה מקבלת זכות תשובה ראשונית. במידה ולא ענתה נכון בתוך 10 שניות, הזכות נפתחת ליתר הקבוצות.
+        </li>
+        <li>
+          <strong>חובת ניסוח כשאלה:</strong>
+          התשובה חייבת להינתן אך ורק במבנה תקני של שאלה ("מהו/מהי/מי הוא...?").
+          <div class="example-box">
+            רמז: "תהליך שיטתי של קליטה, תיאום ציפיות והגדרת גבולות אחריות למתנדב חדש בארגון."<br>
+            מענה תקני: <strong>"מהו תהליך הכניסה לתפקיד (Onboarding)?"</strong>
+          </div>
+        </li>
+        <li>
+          <strong>שאלת Daily Double:</strong>
+          שאלה שבה הקבוצה יכולה להמר על סכום נקודות מתוך הניקוד שצברה עד כה, טרם חשיפת הרמז.
+        </li>
+      </ul>
+      <div style="text-align: center;">
+        <button class="btn" onclick="showScreen('screen-lobby')">הבנתי, נעבור להגדרות</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 3: Lobby -->
+  <div id="screen-lobby" class="screen">
+    <div class="lobby-container">
+      <h2>הגדרות פתיחת משחק</h2>
+      
+      <div class="form-group">
+        <label for="topic-select">בחר נושא משחק:</label>
+        <select id="topic-select"></select>
+      </div>
+
+      <div class="form-group">
+        <label for="board-size-select">מבנה לוח:</label>
+        <select id="board-size-select">
+          <option value="4x4">4 קטגוריות × 4 רמות (100-400)</option>
+          <option value="5x4">5 קטגוריות × 4 רמות (100-400)</option>
+          <option value="5x5">5 קטגוריות × 5 רמות (100-500)</option>
+          <option value="6x5" selected>6 קטגוריות × 5 רמות (100-500)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="team-count-select">כמות קבוצות (1–6):</label>
+        <select id="team-count-select" onchange="renderTeamInputs()">
+          <option value="1">1 קבוצה</option>
+          <option value="2">2 קבוצות</option>
+          <option value="3" selected>3 קבוצות</option>
+          <option value="4">4 קבוצות</option>
+          <option value="5">5 קבוצות</option>
+          <option value="6">6 קבוצות</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>שמות הקבוצות:</label>
+        <div id="team-inputs-container" class="teams-grid"></div>
+      </div>
+
+      <div style="text-align: center; margin-top: 1rem;">
+        <button class="btn" onclick="startGame()">עלייה ללוח המשחק</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 4: Game -->
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <button class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;" onclick="showScreen('screen-lobby')">חזרה ללובי</button>
+      <h2 id="current-topic-title" style="margin: 0; font-size: 1.5rem; color: var(--accent-gold);"></h2>
+      <button class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;" onclick="openRulesModal()">תזכורת כללים</button>
+    </div>
+
+    <div class="board-container" id="board-container"></div>
+    <div class="scoreboard" id="scoreboard"></div>
+  </div>
+
+  <!-- Question Modal -->
+  <div class="modal-overlay" id="modal-question">
+    <div class="modal-content">
+      <div id="daily-double-tag" class="daily-double-banner">Daily Double!</div>
+      <div id="timer" class="timer-display">10</div>
+      <div id="clue-content" class="clue-text"></div>
+      <div id="answer-content" class="answer-box"></div>
+      <div class="modal-actions">
+        <button class="btn" id="btn-reveal" onclick="revealAnswer()">חשיפת תשובה</button>
+        <button class="btn" id="btn-close" style="display:none;" onclick="closeModal()">סגירה והמשך</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Rules Modal -->
+  <div class="modal-overlay" id="modal-rules-floating" onclick="closeRulesModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h3 style="color: var(--accent-gold); font-size: 1.6rem; margin-bottom: 1rem;">תזכורת כללי מענה</h3>
+      <p style="margin-bottom: 0.5rem;">1. מענה תקני אך ורק בצורת שאלה ("מהו...", "מי היא...").</p>
+      <p style="margin-bottom: 0.5rem;">2. 10 שניות בלבד לקבוצה הבוחרת לפני פתיחה למליאה.</p>
+      <p style="margin-bottom: 1.5rem;">3. ניקוד מלא יוענק רק במקרה של ניסוח מדויק ומבוסס.</p>
+      <button class="btn" onclick="closeRulesModal()">חזרה ללוח</button>
+    </div>
+  </div>
+
+  <script>
+    /* BUILTIN_TOPICS: מאגר הנושאים והשאלות לאחר בקרת איכות מלאה */
+    const BUILTIN_TOPICS = [
+      {
+        topic: "ארגז כלים לניהול התנדבות",
+        categories: [
+          {
+            name: "הכנת הארגון והגדרת תפקיד",
+            questions: [
+              {
+                value: 100,
+                clue: "הצעד הראשון והבסיסי ביותר בהיערכות ארגון לקליטת מתנדבים, המבסס כתובת אחת קבועה עבורם ומשדר מקצועיות ורצינות.",
+                answer: "מהו מינוי רכז או מנהל התנדבות?",
+                is_daily_double: false
+              },
+              {
+                value: 200,
+                clue: "כלי תכנוני שמומלץ לעגן בתקציב הכללי של הארגון, הכולל הקצאת שעות רכז, עלויות גיוס, הכשרה, נסיעות, תגמולים, אירועים ולוגיסטיקה.",
+                answer: "מהו תקציב לשילוב מתנדבים בארגון?",
+                is_daily_double: false
+              },
+              {
+                value: 300,
+                clue: "פרקטיקה לעיצוב תפקיד המותאמת למאה ה-21, שבה מעוצב תפקיד המיועד בו-זמנית למספר מתנדבים החולקים משימה עקב מגבלות זמן או זמינות.",
+                answer: "מהן משימות שיתופיות (Job Sharing)?",
+                is_daily_double: false
+              },
+              {
+                value: 400,
+                clue: "ארגון מעוניין לאפשר למתנדבים להתפתח בתוך המערכת על בסיס הניסיון שצברו, ומציע להם הרחבת משימות (קידום רוחבי) או לקיחת אחריות ניהולית (קידום אנכי).",
+                answer: "מהם רוטציות תפקידיות ומסלולי קריירה?",
+                is_daily_double: false
+              },
+              {
+                value: 500,
+                clue: "פרקטיקה בהגדרת תפקיד המציעה למתנדב לקחת חלק במגוון תוכניות למידה נוספות בארגון, במטרה להרחיב את סט המיומנויות והכישורים שלו ולגוון את פעילותו.",
+                answer: "מהן הכשרות חוצות תפקיד (Cross Training)?",
+                is_daily_double: false
+              }
+            ]
+          },
+          {
+            name: "גיוס, מיון וקליטה",
+            questions: [
+              {
+                value: 100,
+                clue: "השיטה המוגדרת בחוברת כדרך האפקטיבית ביותר לגיוס מתנדבים, היוצרת דיאלוג ומאפשרת בחינת התאמה עוד לפני שלב המיון (למשל 'חבר מביא חבר').",
+                answer: "מהי פנייה ממוקדת, אישית ודו-כיוונית?",
+                is_daily_double: false
+              },
+              {
+                value: 200,
+                clue: "כלי ארגוני חיוני המאפשר תיאום ציפיות בסיסי ומתאר תמונה בהירה ואמינה לגבי הזכויות והמחויבויות ההדדיות בין הארגון לבין המתנדב.",
+                answer: "מהו הסכם התנדבות?",
+                is_daily_double: false
+              },
+              {
+                value: 300,
+                clue: "שלב ההיכרות הראשונית וקבלת הפנים של המתנדב בארגון, שמטרתו יצירת שייכות, חשיפה לחזון ולמטרות, והכרת הסביבה הפיזית ובעלי התפקידים.",
+                answer: "מהי תוכנית אוריינטציה?",
+                is_daily_double: false
+              },
+              {
+                value: 400,
+                clue: "רכז התנדבות זקוק למספר רב של מתנדבים בזמן קצר ומפרסם מודעה ברשתות החברתיות ובעיתונות, אך מודע לכך ששיטה זו אינה אפקטיבית לאיתור מתנדבים בעלי כישורים ייחודיים ופרופיל ספציפי.",
+                answer: "מהי שיטת גיוס המוני?",
+                is_daily_double: false
+              },
+              {
+                value: 500,
+                clue: "מתנדב פונה לארגון דרך אתר האינטרנט. על פי הדגשים למיון מתנדבים חדשים במאה ה-21, מהו הצעד הניהולי המיידי הנדרש מהארגון כדי לשדר מקצועיות ויעילות?",
+                answer: "מהו מתן מענה מהיר ומיידי לפנייה?",
+                is_daily_double: false
+              }
+            ]
+          },
+          {
+            name: "שימור, הדרכה וליווי",
+            questions: [
+              {
+                value: 100,
+                clue: "תהליך ליווי קבוצתי שבו מנחה דן עם המתנדבים בתהליכים המקצועיים והאישיים מפעילותם, המהווה המשך ישיר להכשרה ומאפשר למידת עמיתים.",
+                answer: "מהי הדרכת מתנדבים?",
+                is_daily_double: false
+              },
+              {
+                value: 200,
+                clue: "פעילות המספקת מענה לצורכי המתנדבים בהתפתחות וצמיחה אישית באמצעות הרצאות, סדנאות וסיורים, ומהווה כשלעצמה דרך לתגמל מתנדבים.",
+                answer: "מהי העשרת מתנדבים?",
+                is_daily_double: false
+              },
+              {
+                value: 300,
+                clue: "הנקודה המדויקת על פני ציר הזמן שבה מתחיל בפועל תהליך שימור המתנדב על פי תפיסת מעגל חיי המתנדב בחוברת.",
+                answer: "מהו היום הראשון שבו המתנדב פוגש את הארגון?",
+                is_daily_double: false
+              },
+              {
+                value: 400,
+                clue: "מתנדב חווה קושי אישי שאינו נוגע לשאר חברי הקבוצה. הרכז מקיים עמו מפגש פרטני המאפשר לו לפרוק תסכולים, לקבל משוב ולעבור תהליך רפלקטיבי.",
+                answer: "מהו ליווי אישי (פרטני)?",
+                is_daily_double: false
+              },
+              {
+                value: 500,
+                clue: "בבניית תוכנית הכשרה שלמה למתנדבים מוגדרים שלושה היבטים משמעותיים: הכשרה מקצועית לתפקיד, הכשרה מנהלתית לנהלים, והיבט זה הנועד לחבר בין המשתתפים.",
+                answer: "מהי הכשרה חברתית (גיבוש קבוצה)?",
+                is_daily_double: false
+              }
+            ]
+          },
+          {
+            name: "הערכה, משוב, הוקרה וסיום",
+            questions: [
+              {
+                value: 100,
+                clue: "הרכיב הנפוץ ביותר בתהליכי פרידה ממתנדבים בתום פעילותם, היכול להתבצע כטקס, אירוע, הענקת תעודה או שי.",
+                answer: "מהי הוקרה?",
+                is_daily_double: false
+              },
+              {
+                value: 200,
+                clue: "כלל מנחה מרכזי בניהול שיחת משוב אפקטיבית, הקובע כי יש להתמקד בהתנהגויות ספציפיות ובדוגמאות קונקרטיות ולא לתייג את תכונותיו של המתנדב.",
+                answer: "מהו משוב חיובי ובונה (התייחסות להתנהגות ולא לאישיות)?",
+                is_daily_double: false
+              },
+              {
+                value: 300,
+                clue: "סוג המענה והתגמול המתאים ביותר למתנדב שהמניע המרכזי המוביל אותו לפעילות הוא חיזוק מיומנויות וקידום הקריירה התעסוקתית.",
+                answer: "מהם תהליכי הכשרה, משוב מקצועי ומכתבי המלצה?",
+                is_daily_double: false
+              },
+              {
+                value: 400,
+                clue: "בסיום שנת ההתנדבות, הרכז מקיים עם המתנדב מפגש להמשגת הלמידה הרחבה שעבר וקבלת היזון חוזר על אופן ניהול התוכנית ומבנה התפקיד.",
+                answer: "מהי הערכת סיום פעילות (רפלקציה)?",
+                is_daily_double: true
+              },
+              {
+                value: 500,
+                clue: "על פי אמנת ההתנדבות המופיעה בחוברת, כנגד זכותו של המתנדב לקבל הכשרה והדרכה לתפקידו, עומדת חובה זו המחייבת אותו לפעול למען המצוינות בארגון.",
+                answer: "מהי החובה לשאוף להתמקצעות מתמדת והשתתפות בתוכניות ההכשרה?",
+                is_daily_double: false
+              }
+            ]
+          },
+          {
+            name: "התנדבות אפיזודית ורב-גילית",
+            questions: [
+              {
+                value: 100,
+                clue: "סגנון התנדבות המאפשר שילוב של מספר גדול של מתנדבים לפרק זמן קצר, לרוב סביב פרויקט מוגדר או אירוע שיא.",
+                answer: "מהי התנדבות חד-פעמית (אפיזודית)?",
+                is_daily_double: false
+              },
+              {
+                value: 200,
+                clue: "השלב בניהול התנדבות חד-פעמית הכולל קליטה באתר, הכשרה קצרה של 15–30 דקות, ניהול שוטף, פעילויות הוקרה ומשוב.",
+                answer: "מהו שלב ההטמעה?",
+                is_daily_double: false
+              },
+              {
+                value: 300,
+                clue: "קבוצת גיל שהמניעים המרכזיים שלה להתנדבות כוללים רצון 'להחזיר לחברה', שימור בריאות ואיכות חיים, ובילוי שעות פנאי איכותיות.",
+                answer: "מי הם זקנים (אזרחים ותיקים)?",
+                is_daily_double: false
+              },
+              {
+                value: 400,
+                clue: "באירוע התנדבות חד-פעמי, הרכז מכין תדריך קצר כדי להבטיח ביצוע מדויק בפרק זמן מוגבל. איזה סוג הנחיות חיוני שיופיע במסמך זה לפי החוברת?",
+                answer: "מהו מידע ברור וחד-משמעי של 'עשה ואל תעשה'?",
+                is_daily_double: false
+              },
+              {
+                value: 500,
+                clue: "דגש מפתח לשימור מתנדבים מבוגרים במאה ה-21, המאפשר שילוב הפעילות באורח חייהם העמוס תוך מתן זמן איכות והוות מודל חיקוי לילדיהם.",
+                answer: "מהי התנדבות משפחות?",
+                is_daily_double: false
+              }
+            ]
+          },
+          {
+            name: "התמודדות עם מתנדב מורכב",
+            questions: [
+              {
+                value: 100,
+                clue: "הגדרה למתנדבים שלא הפרו נוהל המהווה עילת פרידה מוחלטת, אך התנהגותם שואבת אנרגיה ומצריכה השקעת זמן ומחשבה ניהולית.",
+                answer: "מהם מתנדבים ב'שטח האפור'?",
+                is_daily_double: false
+              },
+              {
+                value: 200,
+                clue: "הבדיקה המקדמית שעל מנהל ההתנדבות לערוך לפני שהוא קובע כי התנהגות בעייתית נובעת ממורכבות אישית של המתנדב עצמו.",
+                answer: "מהי בדיקה האם הבעיה נובעת מליקויים באופן ניהול ההתנדבות?",
+                is_daily_double: false
+              },
+              {
+                value: 300,
+                clue: "טיפוס מתנדב המבקר כמעט כל מהלך של הרכז או הארגון, נותן תחושה ששום דבר אינו מספיק טוב, ולעיתים נהנה מתשומת הלב הנוצרת סביבו.",
+                answer: "מי הוא המתנדב ההיפר-ביקורתי?",
+                is_daily_double: false
+              },
+              {
+                value: 400,
+                clue: "מתנדב שהיה בעבר מבין המסורים ביותר, מגלה סימני עייפות פיזית, איחורים עקביים ונשירה סמויה. הרכז מציע לו פסק זמן, ניוד תפקיד וחיבור מחדש למטרות.",
+                answer: "מי הוא המתנדב השחוק?",
+                is_daily_double: false
+              },
+              {
+                value: 500,
+                clue: "מתנדב מפר באופן מינורי את נהלי הארגון ומתקשה לשמור על גבולות מול מוטבים. מהם עקרונות התגובה הניהוליים הנדרשים מהרכז לפי החוברת?",
+                answer: "מהם בירור מקור הקושי, חידוד הגבולות, הסבר ההיגיון ותגובה על כל חציית גבול?",
+                is_daily_double: false
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    /* Audio Context */
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playTone(freq, type, duration) {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function playTick() { playTone(600, 'sine', 0.05); }
+    function playBuzzer() {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.6);
+      } catch(e) {}
+    }
+
+    /* State Management */
+    let teams = [];
+    let timerInterval = null;
+    let timeLeft = 10;
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      if (screenId === 'screen-lobby') {
+        populateLobby();
+      }
+    }
+
+    function populateLobby() {
+      const select = document.getElementById('topic-select');
+      select.innerHTML = '';
+      if (BUILTIN_TOPICS.length === 0) {
+        select.innerHTML = '<option value="">(לא הוזנו נושאים עדיין)</option>';
+      } else {
+        BUILTIN_TOPICS.forEach((t, idx) => {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = t.topic;
+          select.appendChild(opt);
+        });
+      }
+      renderTeamInputs();
+    }
+
+    function renderTeamInputs() {
+      const count = parseInt(document.getElementById('team-count-select').value);
+      const container = document.getElementById('team-inputs-container');
+      container.innerHTML = '';
+      for (let i = 1; i <= count; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `team-name-input-${i}`;
+        input.value = `קבוצה ${i}`;
+        container.appendChild(input);
+      }
+    }
+
+    function startGame() {
+      if (BUILTIN_TOPICS.length === 0) {
+        alert('לא הוטמע תוכן שאלות במערך BUILTIN_TOPICS.');
+        return;
+      }
+      const topicIndex = document.getElementById('topic-select').value;
+      const topicData = BUILTIN_TOPICS[topicIndex];
+      const teamCount = parseInt(document.getElementById('team-count-select').value);
+      
+      teams = [];
+      for (let i = 1; i <= teamCount; i++) {
+        const nameVal = document.getElementById(`team-name-input-${i}`).value.trim() || `קבוצה ${i}`;
+        teams.push({ name: nameVal, score: 0 });
+      }
+
+      const boardSize = document.getElementById('board-size-select').value;
+      const [cols, rows] = boardSize.split('x').map(Number);
+
+      document.getElementById('current-topic-title').textContent = topicData.topic;
+      buildBoard(topicData, cols, rows);
+      renderScoreboard();
+      showScreen('screen-game');
+    }
+
+    function buildBoard(topicData, numCols, numRows) {
+      const container = document.getElementById('board-container');
+      container.innerHTML = '';
+
+      const validCategories = topicData.categories.slice(0, numCols);
+      
+      const headerRow = document.createElement('div');
+      headerRow.className = 'board-row';
+      headerRow.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
+      validCategories.forEach(cat => {
+        const cell = document.createElement('div');
+        cell.className = 'board-header-cell';
+        cell.textContent = cat.name;
+        headerRow.appendChild(cell);
+      });
+      container.appendChild(headerRow);
+
+      for (let r = 0; r < numRows; r++) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'board-row';
+        rowDiv.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
+
+        validCategories.forEach(cat => {
+          const cardCell = document.createElement('div');
+          cardCell.className = 'card-cell';
+          const qData = cat.questions[r];
+          cardCell.textContent = qData.value;
+          cardCell.onclick = () => openQuestion(qData, cardCell);
+          rowDiv.appendChild(cardCell);
+        });
+        container.appendChild(rowDiv);
+      }
+    }
+
+    function renderScoreboard() {
+      const container = document.getElementById('scoreboard');
+      container.innerHTML = '';
+      teams.forEach((t, index) => {
+        const card = document.createElement('div');
+        card.className = 'team-card';
+        card.innerHTML = `
+          <div class="team-name" contenteditable="true" onblur="updateTeamName(${index}, this.innerText)">${t.name}</div>
+          <div class="team-score" id="score-val-${index}">${t.score}</div>
+          <div class="score-controls">
+            <button class="score-btn minus" onclick="adjustScore(${index}, -100)">-</button>
+            <button class="score-btn plus" onclick="adjustScore(${index}, 100)">+</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function updateTeamName(idx, text) {
+      teams[idx].name = text.trim() || `קבוצה ${idx+1}`;
+    }
+
+    function adjustScore(teamIdx, amount) {
+      teams[teamIdx].score += amount;
+      document.getElementById(`score-val-${teamIdx}`).textContent = teams[teamIdx].score;
+    }
+
+    function openQuestion(qData, cellElement) {
+      if (cellElement.classList.contains('disabled')) return;
+      cellElement.classList.add('disabled');
+
+      const modal = document.getElementById('modal-question');
+      const ddTag = document.getElementById('daily-double-tag');
+      const clueBox = document.getElementById('clue-content');
+      const ansBox = document.getElementById('answer-content');
+      const btnReveal = document.getElementById('btn-reveal');
+      const btnClose = document.getElementById('btn-close');
+
+      ddTag.style.display = qData.is_daily_double ? 'block' : 'none';
+      clueBox.textContent = qData.clue;
+      ansBox.textContent = qData.answer;
+      ansBox.style.display = 'none';
+
+      btnReveal.style.display = 'block';
+      btnClose.style.display = 'none';
+
+      startTimer();
+      modal.classList.add('active');
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 10;
+      const display = document.getElementById('timer');
+      display.textContent = timeLeft;
+      display.classList.remove('danger');
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        display.textContent = timeLeft;
+        if (timeLeft <= 3 && timeLeft > 0) {
+          display.classList.add('danger');
+          playTick();
+        }
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          playBuzzer();
+        }
+      }, 1000);
+    }
+
+    function revealAnswer() {
+      clearInterval(timerInterval);
+      document.getElementById('answer-content').style.display = 'block';
+      document.getElementById('btn-reveal').style.display = 'none';
+      document.getElementById('btn-close').style.display = 'block';
+    }
+
+    function closeModal() {
+      clearInterval(timerInterval);
+      document.getElementById('modal-question').classList.remove('active');
+    }
+
+    function openRulesModal() {
+      document.getElementById('modal-rules-floating').classList.add('active');
+    }
+
+    function closeRulesModal() {
+      document.getElementById('modal-rules-floating').classList.remove('active');
+    }
+  </script>
+</body>
+</html>
