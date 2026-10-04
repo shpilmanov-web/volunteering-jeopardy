@@ -47,6 +47,22 @@
       display: flex;
     }
 
+    /* Logo Styles */
+    .app-logo {
+      max-height: 90px;
+      max-width: 220px;
+      object-fit: contain;
+      margin-bottom: 1.2rem;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    }
+
+    .app-logo-header {
+      max-height: 48px;
+      max-width: 140px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+    }
+
     h1 {
       font-size: 3.5rem;
       color: var(--accent-gold);
@@ -112,10 +128,12 @@
       max-width: 800px;
       width: 100%;
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      text-align: center;
     }
     .rules-list {
       list-style: none;
       margin-bottom: 2rem;
+      text-align: right;
     }
     .rules-list li {
       font-size: 1.25rem;
@@ -152,11 +170,13 @@
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      align-items: stretch;
     }
     .form-group {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      text-align: right;
     }
     label {
       font-weight: bold;
@@ -195,6 +215,11 @@
       align-items: center;
       margin-bottom: 1rem;
       padding: 0 1rem;
+    }
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     .board-container {
       width: 100%;
@@ -306,6 +331,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: transform 0.1s;
+    }
+    .score-btn:active {
+      transform: scale(0.9);
     }
     .score-btn.plus { background: #16a34a; color: white; }
     .score-btn.minus { background: #dc2626; color: white; }
@@ -342,12 +371,18 @@
       background: linear-gradient(90deg, #ea580c, #f59e0b);
       color: white;
       font-weight: 900;
-      font-size: 2rem;
-      padding: 0.5rem 2rem;
+      font-size: 2.2rem;
+      padding: 0.6rem 2.5rem;
       border-radius: 8px;
       text-transform: uppercase;
       letter-spacing: 2px;
       display: none;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+      animation: bannerPulse 1s infinite alternate;
+    }
+    @keyframes bannerPulse {
+      from { transform: scale(0.98); }
+      to { transform: scale(1.03); }
     }
     .timer-display {
       font-size: 3rem;
@@ -397,6 +432,7 @@
     #modal-rules-floating .modal-content {
       max-width: 700px;
       align-items: flex-start;
+      text-align: right;
     }
   </style>
 </head>
@@ -404,6 +440,7 @@
 
   <!-- Screen 1: Splash -->
   <div id="screen-splash" class="screen active" onclick="showScreen('screen-rules')">
+    <img src="logo.png" alt="לוגו התוכנית" class="app-logo" onerror="this.style.display='none';">
     <h1>ג'פרדי ניהול התנדבות</h1>
     <p class="subtitle">זירת המקצוענות והטריוויה של רכזי ומנהלי ההתנדבות</p>
     <div class="pulse-text">לחצו בכל מקום להתחלת המשחק</div>
@@ -412,6 +449,7 @@
   <!-- Screen 2: Rules -->
   <div id="screen-rules" class="screen">
     <div class="rules-card">
+      <img src="logo.png" alt="לוגו התוכנית" class="app-logo" onerror="this.style.display='none';">
       <h2>כללי המשחק המחייבים</h2>
       <ul class="rules-list">
         <li>
@@ -431,7 +469,7 @@
           שאלה שבה הקבוצה יכולה להמר על סכום נקודות מתוך הניקוד שצברה עד כה, טרם חשיפת הרמז.
         </li>
       </ul>
-      <div style="text-align: center;">
+      <div>
         <button class="btn" onclick="showScreen('screen-lobby')">הבנתי, נעבור להגדרות</button>
       </div>
     </div>
@@ -440,7 +478,10 @@
   <!-- Screen 3: Lobby -->
   <div id="screen-lobby" class="screen">
     <div class="lobby-container">
-      <h2>הגדרות פתיחת משחק</h2>
+      <div style="text-align: center;">
+        <img src="logo.png" alt="לוגו התוכנית" class="app-logo" onerror="this.style.display='none';">
+        <h2>הגדרות פתיחת משחק</h2>
+      </div>
       
       <div class="form-group">
         <label for="topic-select">בחר נושא משחק:</label>
@@ -484,7 +525,10 @@
   <div id="screen-game" class="screen">
     <div class="game-header">
       <button class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;" onclick="showScreen('screen-lobby')">חזרה ללובי</button>
-      <h2 id="current-topic-title" style="margin: 0; font-size: 1.5rem; color: var(--accent-gold);"></h2>
+      <div class="header-center">
+        <img src="logo.png" alt="לוגו" class="app-logo-header" onerror="this.style.display='none';">
+        <h2 id="current-topic-title" style="margin: 0; font-size: 1.5rem; color: var(--accent-gold);"></h2>
+      </div>
       <button class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;" onclick="openRulesModal()">תזכורת כללים</button>
     </div>
 
@@ -518,7 +562,6 @@
   </div>
 
   <script>
-    /* BUILTIN_TOPICS: מאגר הנושאים והשאלות לאחר בקרת איכות מלאה */
     const BUILTIN_TOPICS = [
       {
         topic: "ארגז כלים לניהול התנדבות",
@@ -737,44 +780,128 @@
       }
     ];
 
-    /* Audio Context */
+    /* Audio Synthesizer (Web Audio API) */
     let audioCtx = null;
     function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
     }
 
-    function playTone(freq, type, duration) {
+    function playTick() {
       try {
         initAudio();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + 0.05);
       } catch(e) {}
     }
 
-    function playTick() { playTone(600, 'sine', 0.05); }
     function playBuzzer() {
+      try {
+        initAudio();
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc1.type = 'sawtooth';
+        osc2.type = 'sawtooth';
+
+        osc1.frequency.setValueAtTime(130, audioCtx.currentTime);
+        osc1.frequency.linearRampToValueAtTime(85, audioCtx.currentTime + 0.6);
+
+        osc2.frequency.setValueAtTime(136, audioCtx.currentTime);
+        osc2.frequency.linearRampToValueAtTime(91, audioCtx.currentTime + 0.6);
+
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioCtx.currentTime + 0.6);
+        osc2.stop(audioCtx.currentTime + 0.6);
+      } catch(e) {}
+    }
+
+    function playDailyDouble() {
+      try {
+        initAudio();
+        const notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const startTime = audioCtx.currentTime + (idx * 0.12);
+          const duration = 0.22;
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.2, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(startTime);
+          osc.stop(startTime + duration);
+        });
+      } catch(e) {}
+    }
+
+    function playCardOpen() {
       try {
         initAudio();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.6);
+        osc.stop(audioCtx.currentTime + 0.1);
+      } catch(e) {}
+    }
+
+    function playScoreChange(isPositive) {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        
+        if (isPositive) {
+          osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+        } else {
+          osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.15);
+        }
+
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
       } catch(e) {}
     }
 
@@ -784,6 +911,7 @@
     let timeLeft = 10;
 
     function showScreen(screenId) {
+      initAudio();
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(screenId).classList.add('active');
       if (screenId === 'screen-lobby') {
@@ -821,6 +949,7 @@
     }
 
     function startGame() {
+      initAudio();
       if (BUILTIN_TOPICS.length === 0) {
         alert('לא הוטמע תוכן שאלות במערך BUILTIN_TOPICS.');
         return;
@@ -903,6 +1032,7 @@
     function adjustScore(teamIdx, amount) {
       teams[teamIdx].score += amount;
       document.getElementById(`score-val-${teamIdx}`).textContent = teams[teamIdx].score;
+      playScoreChange(amount > 0);
     }
 
     function openQuestion(qData, cellElement) {
@@ -916,7 +1046,14 @@
       const btnReveal = document.getElementById('btn-reveal');
       const btnClose = document.getElementById('btn-close');
 
-      ddTag.style.display = qData.is_daily_double ? 'block' : 'none';
+      if (qData.is_daily_double) {
+        ddTag.style.display = 'block';
+        playDailyDouble();
+      } else {
+        ddTag.style.display = 'none';
+        playCardOpen();
+      }
+
       clueBox.textContent = qData.clue;
       ansBox.textContent = qData.answer;
       ansBox.style.display = 'none';
@@ -954,6 +1091,7 @@
       document.getElementById('answer-content').style.display = 'block';
       document.getElementById('btn-reveal').style.display = 'none';
       document.getElementById('btn-close').style.display = 'block';
+      playCardOpen();
     }
 
     function closeModal() {
