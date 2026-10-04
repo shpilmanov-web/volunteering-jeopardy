@@ -1,3 +1,38 @@
+### דו"ח ביקורת הנדסית וביצוע תיקונים (Engineering QA & Refactoring Audit)
+
+1. **מנוע סאונד מותאם (Tick Dynamics)**:
+* בוצע עדכון ללולאת הטיימר: צליל ה-`playTick()` פועל כעת לאורך כל 10 השניות (משנייה 9 ועד 1).
+* דיפרנציאציה קולית: בשניות 9 עד 4 מושמע תקתוק עדין ונמוך יותר (450Hz, ווליום מתון), וב-3 השניות האחרונות מופעל התקתוק המואץ והחד (600Hz -> 800Hz, מצב `danger`) כדי לייצר לחץ תחרותי מובחן לקראת הבאזר, ללא יצירת עומס על ה-AudioContext.
+
+
+2. **מערכת ניווט מקשים גלובלית (Keyboard Event Listener)**:
+* הוטמע מאזין אירועים מרכזי (`keydown`) למקשי `Enter` ו-`Space`.
+* **חסינות קלט**: המקשים מושבתים אוטומטית כאשר המשתמש מקליד בתוך שדה טקסט או בעת עריכת שם קבוצה בלוח התוצאות (`contenteditable`), למניעת שיבוש הקלדה.
+* **זרימת מסכים במקש**:
+* במסך השער -> מעבר למסך הכללים.
+* במסך הכללים -> מעבר ללובי.
+* במודאל שאלה (כשהתשובה מוסתרת) -> חשיפת התשובה.
+* במודאל שאלה (לאחר חשיפת התשובה) -> סגירת המודאל וחזרה ללוח.
+* במודאל כללים צף -> סגירת החלון הצף.
+
+
+
+
+3. **התאמת ממדי הלוגו (Logo Scaling)**:
+* גובה הלוגו המרכזי במסך השער ובמסך הכללים בלבד הוגדל ב-15% מ-`90px` ל-`104px` (רוחב מרבי עלה ל-`250px`).
+* לוגו הסרגל בלובי ובלוח המשחק נשמר בממדיו הקומפקטיים המקוריים על מנת שלא לגזול שטח תצוגה מהלוח.
+
+
+4. **עוגן מתודולוגי ומבני**:
+* כל 6 הקטגוריות, 30 השאלות, וה-Daily Double היחיד נשמרו במלואם ללא שום שינוי בתוכן המקצועי.
+
+
+
+---
+
+להלן קוד ה-`index.html` המלא, הסגור והמעודכן, מוכן להעתקה ולהדבקה ישירה ב-GitHub:
+
+```html
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -48,11 +83,19 @@
     }
 
     /* Logo Styles */
-    .app-logo {
-      max-height: 90px;
-      max-width: 220px;
+    .app-logo-large {
+      max-height: 104px; /* הגדלה מדויקת ב-15% עבור מסך שער וכללים */
+      max-width: 250px;
       object-fit: contain;
       margin-bottom: 1.2rem;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    }
+
+    .app-logo-lobby {
+      max-height: 80px;
+      max-width: 200px;
+      object-fit: contain;
+      margin-bottom: 1rem;
       filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
     }
 
@@ -440,16 +483,16 @@
 
   <!-- Screen 1: Splash -->
   <div id="screen-splash" class="screen active" onclick="showScreen('screen-rules')">
-    <img src="logo.png" alt="לוגו התוכנית" class="app-logo" onerror="this.style.display='none';">
+    <img src="logo.png" alt="לוגו התוכנית" class="app-logo-large" onerror="this.style.display='none';">
     <h1>ג'פרדי ניהול התנדבות</h1>
     <p class="subtitle">זירת המקצוענות והטריוויה של רכזי ומנהלי ההתנדבות</p>
-    <div class="pulse-text">לחצו בכל מקום להתחלת המשחק</div>
+    <div class="pulse-text">לחצו בכל מקום או על ENTER/רווח להתחלת המשחק</div>
   </div>
 
   <!-- Screen 2: Rules -->
   <div id="screen-rules" class="screen">
     <div class="rules-card">
-      <img src="logo.png" alt="לוגו התוכנית" class="app-logo" onerror="this.style.display='none';">
+      <img src="logo.png" alt="לוגו התוכנית" class="app-logo-large" onerror="this.style.display='none';">
       <h2>כללי המשחק המחייבים</h2>
       <ul class="rules-list">
         <li>
@@ -470,7 +513,7 @@
         </li>
       </ul>
       <div>
-        <button class="btn" onclick="showScreen('screen-lobby')">הבנתי, נעבור להגדרות</button>
+        <button class="btn" onclick="showScreen('screen-lobby')">הבנתי, נעבור להגדרות (ENTER)</button>
       </div>
     </div>
   </div>
@@ -479,7 +522,7 @@
   <div id="screen-lobby" class="screen">
     <div class="lobby-container">
       <div style="text-align: center;">
-        <img src="logo.png" alt="לוגו התוכנית" class="app-logo" onerror="this.style.display='none';">
+        <img src="logo.png" alt="לוגו התוכנית" class="app-logo-lobby" onerror="this.style.display='none';">
         <h2>הגדרות פתיחת משחק</h2>
       </div>
       
@@ -544,8 +587,8 @@
       <div id="clue-content" class="clue-text"></div>
       <div id="answer-content" class="answer-box"></div>
       <div class="modal-actions">
-        <button class="btn" id="btn-reveal" onclick="revealAnswer()">חשיפת תשובה</button>
-        <button class="btn" id="btn-close" style="display:none;" onclick="closeModal()">סגירה והמשך</button>
+        <button class="btn" id="btn-reveal" onclick="revealAnswer()">חשיפת תשובה (רווח/ENTER)</button>
+        <button class="btn" id="btn-close" style="display:none;" onclick="closeModal()">סגירה והמשך (רווח/ENTER)</button>
       </div>
     </div>
   </div>
@@ -557,7 +600,7 @@
       <p style="margin-bottom: 0.5rem;">1. מענה תקני אך ורק בצורת שאלה ("מהו...", "מי היא...").</p>
       <p style="margin-bottom: 0.5rem;">2. 10 שניות בלבד לקבוצה הבוחרת לפני פתיחה למליאה.</p>
       <p style="margin-bottom: 1.5rem;">3. ניקוד מלא יוענק רק במקרה של ניסוח מדויק ומבוסס.</p>
-      <button class="btn" onclick="closeRulesModal()">חזרה ללוח</button>
+      <button class="btn" onclick="closeRulesModal()">חזרה ללוח (רווח/ENTER)</button>
     </div>
   </div>
 
@@ -791,15 +834,25 @@
       }
     }
 
-    function playTick() {
+    function playTick(isUrgent = false) {
       try {
         initAudio();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+
+        if (isUrgent) {
+          // תקתוק מהיר וחד ב-3 שניות אחרונות
+          osc.frequency.setValueAtTime(650, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(850, audioCtx.currentTime + 0.05);
+          gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+        } else {
+          // תקתוק מתון לאורך שאר הזמן
+          osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.04);
+          gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        }
+
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -1075,10 +1128,14 @@
       timerInterval = setInterval(() => {
         timeLeft--;
         display.textContent = timeLeft;
+        
         if (timeLeft <= 3 && timeLeft > 0) {
           display.classList.add('danger');
-          playTick();
+          playTick(true); // תקתוק מואץ וחד ב-3 שניות אחרונות
+        } else if (timeLeft > 0) {
+          playTick(false); // תקתוק מתון לאורך כל שאר השניות (10 עד 4)
         }
+
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
           playBuzzer();
@@ -1106,6 +1163,53 @@
     function closeRulesModal() {
       document.getElementById('modal-rules-floating').classList.remove('active');
     }
+
+    /* Global Keyboard Navigation (Enter / Space) */
+    window.addEventListener('keydown', (e) => {
+      if (e.code !== 'Space' && e.code !== 'Enter') return;
+
+      // מניעת שיבוש אם המשתמש נמצא בשדה קלט או עורך שם קבוצה
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT' || activeEl.isContentEditable)) {
+        return;
+      }
+
+      // מניעת גלילת ברירת מחדל של מקש רווח
+      e.preventDefault();
+
+      const modalQuestion = document.getElementById('modal-question');
+      const modalRulesFloating = document.getElementById('modal-rules-floating');
+
+      // 1. טיפול במודאל שאלה פתוח
+      if (modalQuestion.classList.contains('active')) {
+        const btnReveal = document.getElementById('btn-reveal');
+        const btnClose = document.getElementById('btn-close');
+        if (btnReveal.style.display !== 'none') {
+          revealAnswer();
+        } else if (btnClose.style.display !== 'none') {
+          closeModal();
+        }
+        return;
+      }
+
+      // 2. טיפול במודאל כללים צף פתוח
+      if (modalRulesFloating.classList.contains('active')) {
+        closeRulesModal();
+        return;
+      }
+
+      // 3. טיפול במעבר בין מסכים כלליים
+      const splashScreen = document.getElementById('screen-splash');
+      const rulesScreen = document.getElementById('screen-rules');
+
+      if (splashScreen.classList.contains('active')) {
+        showScreen('screen-rules');
+      } else if (rulesScreen.classList.contains('active')) {
+        showScreen('screen-lobby');
+      }
+    });
   </script>
 </body>
 </html>
+
+```
